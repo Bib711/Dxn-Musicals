@@ -24,8 +24,18 @@ export const timeline: TimelineEvent[] = [
 export const socialMedia: SocialMedia[] = [
   {
     platform: 'Instagram',
-    url: 'https://instagram.com/your-handle',
+    url: 'https://instagram.com/dxn.g.thomas',
     icon: 'Instagram'
+  },
+  {
+    platform: 'Youtube',
+    url: 'https://youtube.com/@dangthomas17',
+    icon: 'Youtube'
+  },
+  {
+    platform: 'Linkedin',
+    url: 'https://linkedin.com/your-handle',
+    icon: 'Linkedin'
   },
   // Add your social media links...
 ];

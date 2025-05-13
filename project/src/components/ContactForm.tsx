@@ -66,30 +66,43 @@ const ContactForm: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+  
     if (validateForm()) {
       setIsSubmitting(true);
-      
-      // Simulate API call
-      setTimeout(() => {
-        setIsSubmitting(false);
-        setSubmitSuccess(true);
-        setFormData({
-          name: '',
-          email: '',
-          subject: '',
-          message: '',
+  
+      const formPayload = new FormData();
+      formPayload.append('name', formData.name);
+      formPayload.append('email', formData.email);
+      formPayload.append('subject', formData.subject);
+      formPayload.append('message', formData.message);
+      formPayload.append('_captcha', 'false');
+      formPayload.append('_template', 'box');
+      formPayload.append('_subject', 'New message from Contact Form');
+  
+      try {
+        const response = await fetch('https://formsubmit.co/dxnmusicals@gmail.com', {
+          method: 'POST',
+          body: formPayload,
         });
-        
-        // Reset success message after 5 seconds
-        setTimeout(() => {
-          setSubmitSuccess(false);
-        }, 5000);
-      }, 1500);
+  
+        if (response.ok) {
+          setSubmitSuccess(true);
+          setFormData({ name: '', email: '', subject: '', message: '' });
+        } else {
+          console.error('Form submission failed');
+        }
+      } catch (error) {
+        console.error('Submission error:', error);
+      } finally {
+        setIsSubmitting(false);
+        setTimeout(() => setSubmitSuccess(false), 5000);
+      }
     }
   };
+  
+  
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

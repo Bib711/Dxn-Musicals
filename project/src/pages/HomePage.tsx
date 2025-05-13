@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { ArrowRight, Music, Film, Mic, PlayCircle } from 'lucide-react';
+import { ArrowRight, Music, Film, Mic, PlayCircle,Guitar,Drum } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageTransition from '../components/PageTransition';
 import WaveBackground from '../components/WaveBackground';
@@ -117,10 +117,11 @@ const HomePage: React.FC = () => {
                 title: 'Film Scoring',
                 description: 'Elevate your visual storytelling with music that enhances every emotional moment.',
               },
+              
               {
-                icon: <Mic className="text-purple-500" size={40} />,
-                title: 'Sound Design',
-                description: 'Create immersive sonic experiences with our expert sound design services.',
+                icon: <Guitar className="text-purple-500" size={40} />,
+                title: 'Band Performance',
+                description: 'Deliver powerful live experiences through dynamic and expressive band performances.',
               },
             ].map((service, index) => (
               <div 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, Instagram, Youtube, Twitter, Headphones } from 'lucide-react';
+import { Mail, Phone, MapPin, Instagram, Youtube, Twitter,Linkedin, Headphones } from 'lucide-react';
 import Logo from './Logo';
 import { socialMedia } from '../data/team';
 
@@ -13,6 +13,8 @@ const Footer: React.FC = () => {
         return <Instagram size={20} />;
       case 'Youtube':
         return <Youtube size={20} />;
+      case 'Linkedin':
+          return <Linkedin size={20} />;
       case 'Twitter':
         return <Twitter size={20} />;
       case 'Headphones':
@@ -92,20 +94,20 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="font-display text-lg font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-3">
-              <li className="flex items-start space-x-3">
+              {/*<li className="flex items-start space-x-3">
                 <MapPin size={20} className="text-purple-500 mt-1 flex-shrink-0" />
                 <span className="text-charcoal-300">
                   123 Music Avenue, Suite 456<br />
                   Los Angeles, CA 90210
                 </span>
-              </li>
+              </li>*/}
               <li className="flex items-center space-x-3">
                 <Phone size={20} className="text-purple-500 flex-shrink-0" />
-                <span className="text-charcoal-300">(310) 555-7890</span>
+                <span className="text-charcoal-300">+91 7306552530</span>
               </li>
               <li className="flex items-center space-x-3">
                 <Mail size={20} className="text-purple-500 flex-shrink-0" />
-                <span className="text-charcoal-300">hello@dxnmusicals.com</span>
+                <span className="text-charcoal-300">dxnmusicals@gmail.com</span>
               </li>
             </ul>
           </div>

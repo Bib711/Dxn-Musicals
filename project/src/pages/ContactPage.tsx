@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { Mail, Phone, MapPin, Instagram, Youtube, Twitter, Headphones } from 'lucide-react';
+import { Mail, Phone, MapPin, Instagram, Youtube, Twitter,Linkedin, Headphones } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
 import ContactForm from '../components/ContactForm';
 import { socialMedia } from '../data/team';
@@ -22,6 +22,8 @@ const ContactPage: React.FC = () => {
         return <Instagram size={24} />;
       case 'Youtube':
         return <Youtube size={24} />;
+      case 'Linkedin':
+          return <Linkedin size={24} />;
       case 'Twitter':
         return <Twitter size={24} />;
       case 'Headphones':
@@ -80,9 +82,10 @@ const ContactPage: React.FC = () => {
               }`}
             >
               <div>
+              <h2 className="font-display text-2xl font-bold ">----------------------</h2>
                 <h2 className="font-display text-2xl font-bold mb-6">Contact Information</h2>
                 <div className="space-y-6">
-                  <div className="flex items-start gap-4">
+                  {/*<div className="flex items-start gap-4">
                     <MapPin className="text-purple-500 mt-1 flex-shrink-0" size={24} />
                     <div>
                       <h3 className="font-medium text-lg mb-1">Studio Location</h3>
@@ -92,14 +95,14 @@ const ContactPage: React.FC = () => {
                         United States
                       </p>
                     </div>
-                  </div>
+                  </div>*/}
                   
                   <div className="flex items-start gap-4">
                     <Mail className="text-purple-500 mt-1 flex-shrink-0" size={24} />
                     <div>
                       <h3 className="font-medium text-lg mb-1">Email Us</h3>
                       <p className="text-charcoal-600 dark:text-charcoal-400">
-                        hello@dxnmusicals.com
+                        dxnmusicals@gmail.com
                       </p>
                       <p className="text-charcoal-500 dark:text-charcoal-500 text-sm mt-1">
                         We aim to respond within 24 hours
@@ -112,11 +115,11 @@ const ContactPage: React.FC = () => {
                     <div>
                       <h3 className="font-medium text-lg mb-1">Call Us</h3>
                       <p className="text-charcoal-600 dark:text-charcoal-400">
-                        (310) 555-7890
+                        +91 7306552530
                       </p>
-                      <p className="text-charcoal-500 dark:text-charcoal-500 text-sm mt-1">
+                      {/*<p className="text-charcoal-500 dark:text-charcoal-500 text-sm mt-1">
                         Monday to Friday, 9:00 AM - 6:00 PM PT
-                      </p>
+                      </p>*/}
                     </div>
                   </div>
                 </div>
@@ -142,7 +145,7 @@ const ContactPage: React.FC = () => {
                 </div>
               </div>
               
-              {/* Map */}
+              {/* Map 
               <div>
                 <h2 className="font-display text-2xl font-bold mb-6">Find Us</h2>
                 <div className="bg-charcoal-100 dark:bg-charcoal-800 rounded-lg overflow-hidden h-64 relative">
@@ -150,7 +153,7 @@ const ContactPage: React.FC = () => {
                     <p>Interactive map would be displayed here</p>
                   </div>
                 </div>
-              </div>
+              </div>*/}
             </div>
           </div>
         </div>
