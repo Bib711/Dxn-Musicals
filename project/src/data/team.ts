@@ -34,7 +34,7 @@ export const socialMedia: SocialMedia[] = [
   },
   {
     platform: 'Linkedin',
-    url: 'https://linkedin.com/your-handle',
+    url: 'https://linkedin.com/in/dan-g-thomas-2a4642365',
     icon: 'Linkedin'
   },
   // Add your social media links...
