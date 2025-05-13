@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, Volume2, SkipBack, SkipForward } from 'lucide-react';
 
 interface VideoPlayerProps {
@@ -12,59 +12,190 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title, thumbnailUrl }) =
   const [isLoaded, setIsLoaded] = useState(false);
   const [progress, setProgress] = useState(0);
   const [volume, setVolume] = useState(0.7);
+  const [videoId, setVideoId] = useState<string | null>(null);
   
-  const videoRef = useRef<HTMLVideoElement>(null);
+  // Generate unique ID for each player instance
+  const playerInstanceId = useRef(`youtube-player-${Math.random().toString(36).substr(2, 9)}`);
+  const containerRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const progressInterval = useRef<number | null>(null);
+  const playerRef = useRef<any>(null);
+
+  useEffect(() => {
+    // Check if it's a YouTube embed URL
+    const isYoutubeEmbed = url.includes('youtube.com/embed/');
+    
+    if (isYoutubeEmbed) {
+      // Extract video ID from embed URL
+      const idMatch = url.match(/\/embed\/([^/?]+)/);
+      const extractedId = idMatch ? idMatch[1] : null;
+      setVideoId(extractedId);
+      
+      // Create a script tag to load the YouTube iframe API if not already loaded
+      if (!(window as any).YT) {
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+      }
+      
+      // Clean up on unmount
+      return () => {
+        if (progressInterval.current) {
+          clearInterval(progressInterval.current);
+        }
+        // Destroy the player instead of removing the iframe
+        if (playerRef.current) {
+          try {
+            playerRef.current.destroy();
+          } catch (e) {
+            console.error("Error destroying player:", e);
+          }
+        }
+      };
+    }
+  }, [url]);
+  
+  useEffect(() => {
+    // Initialize YouTube player once the API is ready and we have a video ID
+    if (videoId) {
+      const initYouTubePlayer = () => {
+        if (!(window as any).YT || !(window as any).YT.Player) {
+          // If API not ready yet, wait and try again
+          setTimeout(initYouTubePlayer, 100);
+          return;
+        }
+        
+        // Create the iframe directly
+        if (containerRef.current) {
+          // Remove any existing iframe first
+          while (containerRef.current.firstChild) {
+            containerRef.current.removeChild(containerRef.current.firstChild);
+          }
+          
+          // Create a new iframe element
+          const iframe = document.createElement('iframe');
+          iframe.id = playerInstanceId.current;
+          iframe.width = '100%';
+          iframe.height = '100%';
+          iframe.src = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&controls=0&showinfo=0&rel=0`;
+          iframe.frameBorder = '0';
+          iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+          iframe.allowFullscreen = true;
+          containerRef.current.appendChild(iframe);
+          
+          // Initialize the player
+          const player = new (window as any).YT.Player(playerInstanceId.current, {
+            events: {
+              'onReady': (event: any) => {
+                event.target.setVolume(volume * 100);
+                setIsLoaded(true);
+                // Store the player reference
+                playerRef.current = event.target;
+              },
+              'onStateChange': (event: any) => {
+                // Update playing state based on YouTube player state
+                if (event.data === (window as any).YT.PlayerState.PLAYING) {
+                  setIsPlaying(true);
+                  
+                  // Start tracking progress
+                  if (progressInterval.current) {
+                    clearInterval(progressInterval.current);
+                  }
+                  progressInterval.current = window.setInterval(() => {
+                    if (playerRef.current) {
+                      try {
+                        const currentTime = playerRef.current.getCurrentTime();
+                        const duration = playerRef.current.getDuration();
+                        if (currentTime && duration) {
+                          setProgress((currentTime / duration) * 100);
+                        }
+                      } catch (e) {
+                        console.error("Error updating progress:", e);
+                      }
+                    }
+                  }, 1000) as unknown as number;
+                  
+                } else if (event.data === (window as any).YT.PlayerState.PAUSED) {
+                  setIsPlaying(false);
+                  if (progressInterval.current) {
+                    clearInterval(progressInterval.current);
+                  }
+                } else if (event.data === (window as any).YT.PlayerState.ENDED) {
+                  setIsPlaying(false);
+                  setProgress(100);
+                  if (progressInterval.current) {
+                    clearInterval(progressInterval.current);
+                  }
+                }
+              }
+            }
+          });
+        }
+      };
+      
+      // Initialize player
+      initYouTubePlayer();
+    }
+    
+    return () => {
+      if (progressInterval.current) {
+        clearInterval(progressInterval.current);
+      }
+    };
+  }, [videoId, volume]);
 
   const togglePlay = () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    if (isPlaying) {
-      video.pause();
-    } else {
-      video.play();
+    if (playerRef.current) {
+      try {
+        if (isPlaying) {
+          playerRef.current.pauseVideo();
+        } else {
+          playerRef.current.playVideo();
+        }
+      } catch (e) {
+        console.error("Error toggling play state:", e);
+      }
     }
-    setIsPlaying(!isPlaying);
   };
 
   const handleProgress = (e: React.MouseEvent<HTMLDivElement>) => {
     const progressBar = progressBarRef.current;
-    const video = videoRef.current;
-    if (!progressBar || !video) return;
-
-    const rect = progressBar.getBoundingClientRect();
-    const percent = (e.clientX - rect.left) / rect.width;
-    video.currentTime = percent * video.duration;
+    if (!progressBar) return;
+    
+    if (playerRef.current) {
+      try {
+        const rect = progressBar.getBoundingClientRect();
+        const percent = (e.clientX - rect.left) / rect.width;
+        const duration = playerRef.current.getDuration();
+        playerRef.current.seekTo(percent * duration);
+      } catch (e) {
+        console.error("Error handling progress:", e);
+      }
+    }
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
     setVolume(value);
-    if (videoRef.current) {
-      videoRef.current.volume = value;
+    
+    if (playerRef.current) {
+      try {
+        playerRef.current.setVolume(value * 100);
+      } catch (e) {
+        console.error("Error changing volume:", e);
+      }
     }
   };
 
-  const handleTimeUpdate = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    
-    const progress = (video.currentTime / video.duration) * 100;
-    setProgress(progress);
-  };
-
   const skip = (seconds: number) => {
-    const video = videoRef.current;
-    if (!video) return;
-    
-    video.currentTime += seconds;
-  };
-
-  const handleVideoLoad = () => {
-    setIsLoaded(true);
-    if (videoRef.current) {
-      videoRef.current.volume = volume;
+    if (playerRef.current) {
+      try {
+        const currentTime = playerRef.current.getCurrentTime();
+        playerRef.current.seekTo(currentTime + seconds);
+      } catch (e) {
+        console.error("Error skipping:", e);
+      }
     }
   };
 
@@ -78,17 +209,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title, thumbnailUrl }) =
             className="absolute inset-0 w-full h-full object-cover"
           />
         )}
-        <video
-          ref={videoRef}
-          className={`w-full h-full object-cover ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-          onTimeUpdate={handleTimeUpdate}
-          onLoadedData={handleVideoLoad}
-          poster={thumbnailUrl}
-          preload="metadata"
-        >
-          <source src={url} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+        
+        <div 
+          ref={containerRef} 
+          className={`w-full h-full ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        ></div>
         
         {!isPlaying && (
           <div 
